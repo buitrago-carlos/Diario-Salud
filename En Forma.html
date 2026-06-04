@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="En Forma">
+<title>En Forma · Rutinas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0f0e; --surface:#141a17; --surface2:#1e2620; --surface3:#28302b;
+  --border:#2e3830; --text:#e8f0eb; --text2:#8fa898; --text3:#4a5c50;
+  --accent:#5dcc8a; --accent2:#3da86a; --blue:#5c9fe0; --orange:#e08a3a;
+  --red:#e05c5c; --yellow:#e8c547; --purple:#9b7fe0; --radius:16px; --radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;
+  min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:90px;overflow-x:hidden}
+.header{padding:52px 20px 16px;position:sticky;top:0;z-index:100;
+  background:rgba(12,15,14,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border)}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start}
+.app-title{font-family:'DM Serif Display',serif;font-size:26px;line-height:1.1}
+.app-sub{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.5px}
+.streak-badge{background:rgba(93,204,138,.12);border:1px solid rgba(93,204,138,.3);
+  border-radius:20px;padding:6px 14px;font-size:12px;color:var(--accent);font-weight:500}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:rgba(20,26,23,.97);border-top:1px solid var(--border);display:flex;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:200}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:12px 0 20px;background:none;border:none;color:var(--text3);
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;cursor:pointer;
+  transition:color .2s;letter-spacing:.3px}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px}
+.view{display:none;padding:0 20px;animation:fadeIn .25s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.section-label{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--text3);
+  text-transform:uppercase;margin:22px 0 12px}
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-tabs::-webkit-scrollbar{display:none}
+.filter-tab{background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+  padding:7px 14px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;transition:all .15s;flex-shrink:0}
+.filter-tab.active{background:rgba(93,204,138,.12);border-color:var(--accent);color:var(--accent)}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:12px;overflow:hidden}
+.ex-card-header{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer}
+.ex-anim-thumb{width:56px;height:56px;border-radius:10px;background:var(--surface2);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ex-info{flex:1}
+.ex-name{font-family:'DM Serif Display',serif;font-size:16px;margin-bottom:3px}
+.ex-meta{font-size:11px;color:var(--text3)}
+.ex-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.ex-tag{font-size:10px;padding:2px 8px;border-radius:8px;background:var(--surface2);color:var(--text3)}
+.ex-tag.rodilla{background:rgba(92,159,224,.15);color:var(--blue)}
+.ex-tag.core{background:rgba(93,204,138,.12);color:var(--accent)}
+.ex-tag.postura{background:rgba(232,197,71,.12);color:var(--yellow)}
+.ex-tag.cadera{background:rgba(224,138,58,.15);color:var(--orange)}
+.ex-tag.abdominal{background:rgba(155,127,224,.15);color:var(--purple)}
+.ex-tag.cardio{background:rgba(224,92,92,.12);color:var(--red)}
+.ex-chevron{color:var(--text3);font-size:18px;transition:transform .2s}
+.ex-card.open .ex-chevron{transform:rotate(90deg)}
+.ex-detail{display:none;padding:0 18px 18px;border-top:1px solid var(--surface2)}
+.ex-card.open .ex-detail{display:block}
+.ex-anim-full{width:100%;height:160px;border-radius:var(--radius-sm);background:var(--surface2);
+  margin:14px 0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ex-description{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:14px}
+.ex-steps{margin-bottom:16px}
+.ex-step{display:flex;gap:12px;margin-bottom:10px}
+.step-num{width:22px;height:22px;border-radius:50%;background:rgba(93,204,138,.15);
+  border:1px solid rgba(93,204,138,.3);display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--accent);flex-shrink:0;font-weight:600}
+.step-text{font-size:12px;color:var(--text2);line-height:1.6;padding-top:2px}
+.ex-actions{display:flex;gap:8px}
+.btn-yt{flex:1;background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);
+  border-radius:var(--radius-sm);padding:11px;font-family:'DM Sans',sans-serif;font-size:12px;
+  font-weight:500;color:var(--red);cursor:pointer;text-align:center;text-decoration:none;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-add-routine{flex:1;background:rgba(93,204,138,.12);border:1px solid rgba(93,204,138,.3);
+  border-radius:var(--radius-sm);padding:11px;font-family:'DM Sans',sans-serif;font-size:12px;
+  font-weight:500;color:var(--accent);cursor:pointer;transition:all .15s}
+.btn-add-routine.added{background:rgba(93,204,138,.25);border-color:var(--accent)}
+.routine-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:12px;overflow:hidden}
+.routine-card-header{padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.routine-card-title{font-family:'DM Serif Display',serif;font-size:17px}
+.routine-card-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.routine-card-body{display:none;padding:0 18px 18px;border-top:1px solid var(--surface2)}
+.routine-card.open .routine-card-body{display:block}
+.routine-ex-item{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--surface2)}
+.routine-ex-item:last-child{border-bottom:none}
+.routine-ex-num{width:24px;height:24px;border-radius:50%;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent);font-weight:600;flex-shrink:0}
+.routine-ex-info{flex:1}
+.routine-ex-name{font-size:13px;font-weight:500}
+.routine-ex-dur{font-size:11px;color:var(--text3);margin-top:1px}
+.btn-start{background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius-sm);
+  padding:13px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;width:100%;
+  cursor:pointer;margin-top:14px;letter-spacing:.5px;transition:all .2s}
+.btn-start:active{transform:scale(.98);background:var(--accent2)}
+.session-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px}
+.session-ex{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface2)}
+.session-ex:last-child{border-bottom:none}
+.session-check{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);
+  background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;font-size:14px}
+.session-check.done{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.session-ex-info{flex:1}
+.session-ex-name{font-size:14px;font-weight:500}
+.session-ex-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.progress-bar-wrap{background:var(--surface2);border-radius:4px;height:6px;margin:12px 0;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease}
+.btn-primary{background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius-sm);
+  padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;width:100%;
+  cursor:pointer;letter-spacing:.5px;transition:all .2s;margin-bottom:8px}
+.btn-primary:active{transform:scale(.98);background:var(--accent2)}
+.btn-secondary{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text3);width:100%;cursor:pointer;margin-bottom:12px}
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px 18px;margin-bottom:10px;position:relative}
+.hist-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.hist-duration{font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(93,204,138,.12);color:var(--accent)}
+.hist-exercises{font-size:13px;color:var(--text2);line-height:1.6}
+.hist-feel{font-size:12px;color:var(--text3);margin-top:6px}
+.hist-delete{position:absolute;top:14px;right:14px;background:none;border:none;
+  color:var(--text3);font-size:13px;cursor:pointer;opacity:.5}
+.modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end}
+.modal.open{display:flex}
+.modal-sheet{background:var(--surface);border:1px solid var(--border);border-radius:24px 24px 0 0;
+  padding:20px 20px 40px;width:100%;max-width:430px;margin:0 auto;max-height:88vh;overflow-y:auto;
+  animation:slideUp .3s cubic-bezier(.32,.72,0,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.feel-row{display:flex;gap:8px;margin-bottom:14px}
+.feel-btn{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px;text-align:center;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;
+  color:var(--text2);transition:all .15s}
+.feel-btn.selected{background:rgba(93,204,138,.15);border-color:var(--accent);color:var(--accent)}
+.input-field{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%;
+  resize:none;outline:none;transition:border-color .2s;margin-bottom:12px}
+.input-field:focus{border-color:var(--accent)}
+.input-field::placeholder{color:var(--text3)}
+.label-sm{font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:.5px}
+.mb16{margin-bottom:16px}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:14px;text-align:center}
+.metric-val{font-family:'DM Serif Display',serif;font-size:24px;color:var(--accent)}
+.metric-label{font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.5px}
+.metric-delta{font-size:11px;margin-top:4px}
+.metric-delta.good{color:var(--accent)}
+.metric-delta.bad{color:var(--red)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--surface3);border:1px solid var(--border);border-radius:20px;padding:10px 20px;
+  font-size:13px;color:var(--text);opacity:0;transition:all .3s;z-index:1000;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.7}
+.empty-state .icon{font-size:36px;margin-bottom:12px}
+/* SVG figures */
+.fig-body{fill:#1e3a2e;stroke:#3a6e50;stroke-width:1.5}
+.fig-head{fill:#2a4a38;stroke:#3a6e50;stroke-width:1.5}
+.fig-accent{fill:rgba(93,204,138,.3);stroke:var(--accent);stroke-width:1.5}
+.fig-floor{fill:none;stroke:#2e3830;stroke-width:2}
+.fig-wall{fill:#1a2420;stroke:#2e3830;stroke-width:2}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes sway{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-12deg)}}
+@keyframes rise{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes squeeze{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.88)}}
+@keyframes nod{0%,100%{transform:rotate(0deg)}50%{transform:rotate(15deg)}}
+@keyframes elbowSweep{0%,100%{transform:rotate(0deg)}50%{transform:rotate(55deg)}}
+@keyframes elbowSweepR{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-55deg)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-row">
+    <div>
+      <div class="app-title">En Forma</div>
+      <div class="app-sub">Rutinas · Guía · Registro</div>
+    </div>
+    <div class="streak-badge" id="streakBadge">0 días</div>
+  </div>
+</div>
+
+<!-- VIEW: RUTINAS -->
+<div class="view active" id="view-rutinas">
+  <p class="section-label">Mis rutinas</p>
+  <div id="routines-display"></div>
+</div>
+
+<!-- VIEW: GUÍA -->
+<div class="view" id="view-guia">
+  <p class="section-label">Biblioteca</p>
+  <div class="filter-tabs">
+    <div class="filter-tab active" onclick="filterEx('all',this)">Todos</div>
+    <div class="filter-tab" onclick="filterEx('rodilla',this)">🦵 Rodilla</div>
+    <div class="filter-tab" onclick="filterEx('postura',this)">🧍 Postura</div>
+    <div class="filter-tab" onclick="filterEx('core',this)">💪 Core</div>
+    <div class="filter-tab" onclick="filterEx('cadera',this)">🔄 Cadera</div>
+    <div class="filter-tab" onclick="filterEx('abdominal',this)">🔥 Abdominal</div>
+    <div class="filter-tab" onclick="filterEx('cardio',this)">❤️ Cardio</div>
+  </div>
+  <div id="ex-list"></div>
+</div>
+
+<!-- VIEW: SESIÓN -->
+<div class="view" id="view-sesion">
+  <p class="section-label">Sesión activa</p>
+  <div id="session-display"></div>
+</div>
+
+<!-- VIEW: PROGRESO -->
+<div class="view" id="view-progreso">
+  <p class="section-label">Mi progreso</p>
+  <div class="metrics-grid" id="metrics-display"></div>
+  <p class="section-label">Historial de sesiones</p>
+  <div id="history-display"></div>
+  <p class="section-label">Registrar medidas</p>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px">
+    <p class="label-sm">PESO (kg)</p>
+    <input class="input-field" type="number" id="inp-peso" placeholder="ej: 90" step="0.1">
+    <p class="label-sm">CINTURA (cm)</p>
+    <input class="input-field" type="number" id="inp-cintura" placeholder="ej: 110" step="0.5">
+    <button class="btn-primary" onclick="saveMetrics()">Guardar medidas</button>
+  </div>
+</div>
+
+<!-- MODAL: GUARDAR SESIÓN -->
+<div class="modal" id="modal-session">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">¿Cómo te fue?</div>
+    <div class="modal-sub">Registra cómo se sintió la sesión</div>
+    <p class="label-sm">SENSACIÓN GENERAL</p>
+    <div class="feel-row mb16" id="feel-general">
+      <div class="feel-btn" onclick="selectFeel('general',this,'😓 Difícil')">😓 Difícil</div>
+      <div class="feel-btn" onclick="selectFeel('general',this,'😐 Normal')">😐 Normal</div>
+      <div class="feel-btn" onclick="selectFeel('general',this,'💪 Bien')">💪 Bien</div>
+    </div>
+    <p class="label-sm">¿CÓMO SE SINTIÓ LA RODILLA?</p>
+    <div class="feel-row mb16" id="feel-knee">
+      <div class="feel-btn" onclick="selectFeel('knee',this,'✅ Sin dolor')">✅ Sin dolor</div>
+      <div class="feel-btn" onclick="selectFeel('knee',this,'⚠️ Leve')">⚠️ Leve</div>
+      <div class="feel-btn" onclick="selectFeel('knee',this,'🔴 Con dolor')">🔴 Con dolor</div>
+    </div>
+    <textarea class="input-field" id="session-nota" rows="3" placeholder="Observaciones..."></textarea>
+    <button class="btn-primary" onclick="saveSession()">Guardar sesión</button>
+    <button class="btn-secondary" onclick="closeModal('modal-session')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: EXERCISE DETAIL (shown during session without leaving) -->
+<div class="modal" id="modal-ex-detail">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="modal-ex-content"></div>
+    <button class="btn-secondary" onclick="closeModal('modal-ex-detail')">← Volver a la sesión</button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showView('rutinas',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Rutinas
+  </button>
+  <button class="nav-btn" onclick="showView('guia',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    Guía
+  </button>
+  <button class="nav-btn" onclick="showView('sesion',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Sesión
+  </button>
+  <button class="nav-btn" onclick="showView('progreso',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Progreso
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// EXERCISES DATABASE
+// ═══════════════════════════════════════════════════════
+const EX = [
+  // ── MANTENIMIENTO ──────────────────────────────────
+  {id:'arm-rot',name:'Rotación del brazo',dur:'50 círculos (25 por dirección)',tags:['postura'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+arm+rotations',
+   desc:'Fortalece los músculos de la espalda alta involucrados en la articulación de esfera y cavidad del hombro. Los brazos hacen círculos pequeños de unos 15 cm de diámetro, primero hacia adelante y luego hacia atrás.',
+   steps:['Párate con la cabeza erguida, los pies rectos y los brazos a los costados.','Aprieta las manos al estilo "puño del golfista": dedos enroscados, nudillos flexionados, pulgares extendidos.','Alza los brazos a los lados sin doblar los codos, con las palmas hacia abajo y los pulgares apuntando al frente. Los brazos deben estar al nivel de los hombros.','Si un hombro se mueve hacia adelante o arriba, baja ambos brazos hasta que se estabilicen.','Junta ligeramente los omóplatos. Rota los brazos hacia adelante (en la dirección que apuntan los pulgares) en círculos de unos 15 cm. Haz 25 veces.','Invierte: voltea las palmas hacia arriba y los pulgares hacia atrás. Haz 25 círculos en la dirección inversa.'],},
+
+  {id:'elbow-wave',name:'Ondulación del codo',dur:'25 ondulaciones',tags:['postura','cadera'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+elbow+curls',
+   desc:'Los nudillos descansan en las sienes con los pulgares extendidos hacia abajo. Los codos parten alineados con los hombros y se balancean al frente hasta tocarse. Recuerda al hombro su función de bisagra y mejora la postura torácica.',
+   steps:['Párate erguido. Forma el "puño del golfista": mano cerrada, índice y medio extendidos.','Coloca los nudillos (entre 1ª y 2ª articulación) sobre las sienes. Pulgares extendidos hacia abajo, paralelos a las mejillas.','Posición inicial: codos abiertos hacia los lados, alineados con los hombros.','Balancea lentamente ambos codos hacia el frente hasta que se toquen entre sí.','Regresa los codos a la posición inicial alineada con los hombros. Eso es 1 ondulación.','Mantén la cabeza quieta y erguida. Si se mueve, reduce el ritmo o apóyate en una pared.','Realiza 25 ondulaciones lentas y controladas.'],},
+
+  {id:'foot-rot',name:'Rotación del pie y flexión de puntas',dur:'30 rot + 20 flex por lado',tags:['rodilla','postura'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+foot+circles+ankle+flexion',
+   desc:'Restaura la flexibilidad del tobillo y fortalece los músculos de flexión y extensión. El movimiento sale exclusivamente del tobillo — la rodilla permanece totalmente quieta.',
+   steps:[
+     'Acuéstate boca arriba. Extiende una pierna en el suelo con los dedos apuntando al techo.',
+     'Dobla la otra rodilla hacia el pecho. Junta las manos detrás de esa rodilla para sostenerla quieta.',
+     'ROTACIÓN: rota el pie 30 veces en el sentido de las manecillas del reloj. Solo mueve el tobillo.',
+     'Invierte la dirección: 30 rotaciones en sentido contrario.',
+     'FLEXIÓN: desde la misma posición, flexiona los dedos hacia la espinilla (dorsiflexión) y luego estíralos hacia la punta (plantarflexión). 20 repeticiones.',
+     'Cambia de pierna y repite todo. La rodilla sostenida no debe moverse en ningún momento.'
+   ],},
+
+  {id:'seated-twist',name:'Giro sentado en el suelo',dur:'1 min por cada lado',tags:['postura','cadera','core'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+sitting+floor+twist',
+   desc:'Moviliza la columna torácica y lumbar. Libera la tensión acumulada entre la cadera y la espalda baja.',
+   steps:['Siéntate en el suelo con las piernas extendidas al frente.','Dobla la rodilla derecha y coloca el pie derecho fuera de la rodilla izquierda.','Gira el tronco hacia la derecha, apoya el codo izquierdo fuera de la rodilla derecha.','Mira por encima del hombro derecho.','Mantén 1 minuto respirando profundo — profundiza el giro con cada exhalación.','Repite al otro lado.'],},
+
+  {id:'cats-dogs',name:'Gatos y Perros',dur:'10 repeticiones',tags:['postura','core','cadera'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+cats+and+dogs',
+   desc:'Pone a trabajar las caderas, columna, hombros y cuello en flexión-extensión coordinadas. Las rodillas alineadas con las caderas y las muñecas con los hombros; pantorrillas paralelas entre sí.',
+   steps:['Ponte a gatas. Rodillas alineadas con las caderas, muñecas con los hombros. Pantorrillas paralelas entre sí y con las caderas. Distribuye el peso uniformemente.','GATO: encorva suavemente la espalda mientras bajas la cabeza, creando una curva desde las nalgas hasta el cuello — espalda arqueada hacia arriba.','PERRO: baja suavemente la espalda mientras subes la cabeza — espalda hundida, cabeza arriba.','Haz estos dos movimientos de forma continua y suave. Una serie de 10 repeticiones completas.'],},
+
+  {id:'kneeling-groin',name:'Estiramiento de la ingle de rodillas',dur:'1 min por lado',tags:['cadera','rodilla'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+kneeling+groin+stretch',
+   desc:'Recuerda a los músculos de la ingle su función de estabilizar la cadera. Se siente el estiramiento en la ingle.',
+   steps:['Ponte de rodillas y coloca un pie al frente con la rodilla doblada a 90°.','Mantén la cabeza y la espalda erguidas.','Entrelaza las manos con las palmas hacia abajo sobre la rodilla frontal.','Impúlsate hacia adelante manteniendo las caderas firmes. No gires el tronco.','La rodilla frontal no debe sobrepasar el tobillo.','Mantén 1 minuto sintiendo el estiramiento en la ingle. Cambia de lado.'],},
+
+  {id:'downdog',name:'Perro hacia abajo',dur:'1 minuto',tags:['postura','core','cadera'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+downward+dog',
+   desc:'Restablece el enlace de las muñecas con los pies. Las caderas elevadas forman un triángulo tenso y estable con el suelo.',
+   steps:['Adopta la posición de Gatos y Perros (cuatro puntos).','Dobla los dedos de los pies e impúlsate con las piernas para elevar el torso — las rodillas no deben tocar el suelo.','Sigue impulsándote hasta que las caderas estén más arriba que los hombros, formando un triángulo.','Las rodillas deben estar rectas, pantorrillas y muslos tensos. Los pies apuntando al frente, en línea con las manos.','La espalda debe estar plana, no arqueada. Las caderas elevadas ejercen presión hacia los talones.','Si no puedes poner los talones en el suelo, reduce la distancia sin destensar las piernas. No las fuerces. Mantén 1 minuto.'],},
+
+  {id:'air-bench',name:'Banco de aire',dur:'1 a 3 minutos',tags:['rodilla','core'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+air+bench',
+   desc:'Pone simultáneamente en extensión las caderas, rodillas y tobillos mientras están alineados y bajo carga. Camina 1 minuto después de realizarlo.',
+   steps:['Recárgate contra la pared. Pega las caderas y la espalda baja a la pared.','Avanza los pies hacia adelante y deslízate hacia abajo hasta adoptar una posición sentada a 90°.','Las rodillas deben quedar a la altura de los tobillos, no de los dedos de los pies.','Aprieta la espalda baja y media contra la pared — debes sentir el trabajo del cuádriceps en lo alto del muslo.','Si sientes dolor en las rótulas, sube el cuerpo deslizándote sobre la pared para reducir la presión.','Mantén de 1 a 3 minutos. Si es muy pesado, empieza con unos segundos y aumenta gradualmente. Camina 1 minuto al terminar.'],},
+
+  // ── RODILLA ────────────────────────────────────────
+  {id:'static-back',name:'Espalda estática',dur:'5 a 10 minutos',tags:['postura','core','rodilla'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+static+back',
+   desc:'Asienta las caderas en el suelo y libera los músculos compensatorios que interfieren con la marcha, el pie y el tobillo.',
+   steps:['Acuéstate boca arriba con ambas piernas flexionadas en ángulo recto sobre una silla o cubo.','Posa las manos en el vientre o en el suelo, por debajo del nivel de los hombros, con las palmas hacia arriba.','Permite que la espalda se asiente completamente en el suelo.','Respira con el diafragma (respiración abdominal): los músculos abdominales suben al inhalar y bajan al exhalar.','Permanece en esta posición de 5 a 10 minutos.'],},
+
+  {id:'cushion-squeeze',name:'Presión de cojín con rodillas',dur:'4 series × 10 repeticiones',tags:['rodilla'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+knee+pillow+squeeze+seated',
+   desc:'Los músculos abductores y aductores realizan su tarea primaria en vez de operar como músculos para caminar. No deben participar el estómago ni la espalda alta.',
+   steps:['Siéntate en el borde de una silla o banca y arquea la espalda haciendo las caderas hacia adelante. Enderézate.','Confirma que rodillas y pies estén alineados con las caderas. Relaja el abdomen — permite que cuelgue.','Coloca un cojín entre las rodillas. Dóblalo si necesitas que sea más grueso.','Usa los muslos internos para apretar el cojín, luego suelta suavemente. Eso es 1 repetición.','Los pies deben permanecer paralelos entre sí durante todo el ejercicio.','Haz 4 series de 10 repeticiones.'],},
+
+  {id:'floor-sit',name:'Sentarse en el suelo',dur:'4 a 6 minutos',tags:['rodilla','cadera','postura'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+floor+sitting+wall',
+   desc:'Establece un enlace de hombro, cadera, rodilla y tobillo. Los omóplatos juntos y los muslos tensos son clave para activar la cadena correcta.',
+   steps:['Siéntate contra una pared con las piernas extendidas al frente.','Junta los omóplatos y mantenlos así durante todo el ejercicio. No eleves los hombros.','Tensa los muslos y flexiona los pies de manera que los dedos apunten hacia ti.','Conserva los brazos a los costados o relajados sobre los muslos.','Permanece en esta posición de 4 a 6 minutos.'],},
+
+  {id:'supine-groin',name:'Ingle progresiva en decúbito dorsal',dur:'Mín 3 min por fase',tags:['rodilla','cadera','postura'],
+   yt:'https://www.youtube.com/results?search_query=egoscue+supine+groin+progressive',
+   desc:'Baja progresivamente la pierna extendida hasta que descanse en el piso. Usa la prueba del muslo: cuando la contracción más fuerte suba hasta la parte alta del muslo, es momento de cambiar de lado.',
+   steps:['Acuéstate boca arriba. Una pierna sobre silla o cubo con la rodilla a 90°.','Extiende la otra pierna y elévala sobre una pila de libros u objeto similar — lo suficientemente alto para que la espalda y caderas se mantengan rectas en el suelo. El pie descansa sobre el talón.','El pie de la pierna extendida debe mantenerse derecho para impedir que rote a un lado.','Relaja la espalda en el suelo — no intentes tensarla, deja que repose naturalmente.','Baja progresivamente el pie de la pierna extendida unos 13 a 20 cm cada vez. Mantén mínimo 3 minutos por fase.','Prueba del muslo: contrae el muslo extendido cada 3-5 min. Cuando la contracción más fuerte llegue a la parte alta del muslo, cambia de lado.'],},
+
+  // ── ABDOMINAL / CARDIO ─────────────────────────────
+  {id:'dead-bug',name:'Dead Bug',dur:'3×10 repeticiones',tags:['abdominal','core'],
+   yt:'https://www.youtube.com/results?search_query=dead+bug+exercise+core',
+   desc:'Activa el core profundo (transverso abdominal) sin comprimir la columna. Seguro con rodilla operada, sin impacto.',
+   steps:['Acuéstate boca arriba. Brazos extendidos hacia el techo. Rodillas a 90° en el aire.','Presiona la espalda baja contra el suelo y mantenla así durante todo el ejercicio.','Exhala: baja el brazo derecho hacia atrás y extiende la pierna izquierda simultáneamente.','Para justo antes de que toquen el suelo. Inhala.','Regresa al centro. Repite con el lado opuesto. Eso es 1 rep.','3 series de 10 repeticiones con 45 seg de descanso.'],},
+
+  {id:'glute-bridge',name:'Puente de glúteos',dur:'3×15 repeticiones',tags:['abdominal','core','rodilla'],
+   yt:'https://www.youtube.com/results?search_query=glute+bridge+exercise',
+   desc:'Activa glúteos y core, reduce la grasa abdominal y estabiliza la rodilla. Uno de los mejores ejercicios post-LCA.',
+   steps:['Acuéstate boca arriba, rodillas dobladas, pies apoyados en el suelo al ancho de cadera.','Brazos a los lados con palmas abajo.','Contrae glúteos y abdomen. Levanta la cadera hasta formar una línea recta hombro-cadera-rodilla.','Mantén 2 segundos arriba. Aprieta los glúteos en la cima.','Baja lentamente. Eso es 1 repetición.','3 series de 15 con 45 seg de descanso entre series.'],},
+
+  {id:'mountain-climber-slow',name:'Mountain Climber lento',dur:'3×20 repeticiones',tags:['abdominal','cardio','core'],
+   yt:'https://www.youtube.com/results?search_query=slow+mountain+climbers+core',
+   desc:'Versión lenta y controlada. Activa el core profundo y eleva la frecuencia cardíaca sin impacto en la rodilla operada.',
+   steps:['Posición de plancha alta: manos bajo hombros, cuerpo recto.','Contrae el abdomen durante todo el ejercicio.','Lleva la rodilla DERECHA hacia el pecho lentamente (3 segundos).','Regresa al inicio. Luego la rodilla IZQUIERDA. Eso es 1 rep.','Enfócate en el control, no en la velocidad.','Si la rodilla molesta, mantén solo la plancha estática 30 seg.'],},
+
+  {id:'seated-march',name:'Marcha sentado',dur:'3 min continuo',tags:['cardio','abdominal'],
+   yt:'https://www.youtube.com/results?search_query=seated+marching+exercise+cardio',
+   desc:'Cardio de bajo impacto ideal para empezar. Eleva la frecuencia cardíaca sin cargar la rodilla. Perfecto para quemar grasa abdominal de forma progresiva.',
+   steps:['Siéntate al borde de una silla firme, espalda recta.','Levanta la rodilla derecha lo más alto que puedas, luego baja.','Alterna: derecha, izquierda, derecha... como si marcharas.','Mueve los brazos al ritmo opuesto (brazo izquierdo sube con rodilla derecha).','Mantén un ritmo constante durante 3 minutos.','Progresión: añade 1 minuto cada semana hasta llegar a 10 min.'],},
+
+  {id:'walk',name:'Caminata activa',dur:'20–30 minutos',tags:['cardio'],
+   yt:'https://www.youtube.com/results?search_query=brisk+walking+fat+loss',
+   desc:'El ejercicio más efectivo y seguro para quemar grasa visceral con rodilla en recuperación. Prioridad sobre cualquier otro cardio.',
+   steps:['Camina a un ritmo en que puedas hablar pero no cantar (zona aeróbica).','Mantén la espalda erguida, hombros atrás y abajo.','Mueve los brazos activamente — aumenta el gasto calórico.','Meta inicial: 20 minutos. Añade 5 minutos cada semana.','Meta a 2 meses: 30–45 minutos diarios.','Después de caminar, haz la rutina de mantenimiento para recuperar la postura.'],},
+];
+
+// ═══════════════════════════════════════════════════════
+// ROUTINES
+// ═══════════════════════════════════════════════════════
+const ROUTINES = [
+  {
+    id:'mantenimiento',
+    name:'Rutina de mantenimiento',
+    emoji:'🌿',
+    desc:'Rutina base de movilidad. Realízala diariamente para mantener la alineación corporal.',
+    totalMin:'~25 min',
+    exercises:[
+      {id:'arm-rot',note:'25 círculos hacia adelante + 25 hacia atrás'},
+      {id:'elbow-wave',note:'25 ondulaciones'},
+      {id:'foot-rot',note:'30 rotaciones + 20 flexiones por cada lado'},
+      {id:'seated-twist',note:'1 minuto por cada lado'},
+      {id:'cats-dogs',note:'10 repeticiones'},
+      {id:'kneeling-groin',note:'1 minuto por lado'},
+      {id:'downdog',note:'1 minuto'},
+      {id:'air-bench',note:'1 a 3 minutos + 1 min caminata'},
+    ]
+  },
+  {
+    id:'rodilla',
+    name:'Rodilla con rotación externa',
+    emoji:'🦵',
+    desc:'Protocolo específico para tratar la rodilla con rotación externa. Prioriza la alineación de la cadena cinética.',
+    totalMin:'~25 min',
+    exercises:[
+      {id:'static-back',note:'5 a 10 minutos'},
+      {id:'cushion-squeeze',note:'4 series × 10 repeticiones'},
+      {id:'floor-sit',note:'4 a 6 minutos'},
+      {id:'supine-groin',note:'Mínimo 3 minutos por fase'},
+    ]
+  },
+  {
+    id:'abdominal',
+    name:'Core y quema abdominal',
+    emoji:'🔥',
+    desc:'Ejercicios de bajo impacto para reducir grasa visceral y fortalecer el core. Compatible con rodilla en recuperación.',
+    totalMin:'~30 min',
+    exercises:[
+      {id:'walk',note:'20–30 minutos (prioridad)'},
+      {id:'glute-bridge',note:'3 series × 15 repeticiones'},
+      {id:'dead-bug',note:'3 series × 10 repeticiones'},
+      {id:'mountain-climber-slow',note:'3 series × 20 rep (lento y controlado)'},
+      {id:'seated-march',note:'3 minutos continuos'},
+    ]
+  },
+  {
+    id:'variaciones',
+    name:'Patrón de variaciones de movimiento',
+    emoji:'🕺',
+    desc:'Rutina ligera que reactiva patrones posturales básicos. Ideal como calentamiento o en cualquier momento del día.',
+    totalMin:'~10 min',
+    exercises:[
+      {id:'var-1',note:'Levanta ambas manos hasta arriba'},
+      {id:'var-2',note:'Gira lateralmente rotando la cintura'},
+      {id:'var-3',note:'Voltea la cabeza a izquierda y derecha'},
+      {id:'var-4',note:'Mira al techo'},
+      {id:'var-5',note:'Siéntate en el suelo'},
+      {id:'var-6',note:'Arrodíllate'},
+      {id:'var-7',note:'Agita los brazos como si fueran alas'},
+      {id:'var-8',note:'Súbete a una silla'},
+      {id:'var-9',note:'Balancéate en una sola pierna'},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let sessions = JSON.parse(localStorage.getItem('ego-sessions2')||'[]');
+let metrics  = JSON.parse(localStorage.getItem('ego-metrics')||'[]');
+let activeRoutine = null;
+let sessionChecked = {};
+let sessionFeel = null;
+let sessionKnee = null;
+let exFilter = 'all';
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init(){
+  renderRoutines();
+  renderLibrary();
+  renderSession();
+  renderProgress();
+  updateStreak();
+}
+
+function updateStreak(){
+  const days = new Set(sessions.map(s=>new Date(s.time).toDateString())).size;
+  document.getElementById('streakBadge').textContent = days+' días';
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='progreso') renderProgress();
+  if(name==='sesion') renderSession();
+}
+
+// ═══════════════════════════════════════════════════════
+// ROUTINES VIEW
+// ═══════════════════════════════════════════════════════
+function renderRoutines(){
+  const el = document.getElementById('routines-display');
+  el.innerHTML = ROUTINES.map(r=>`
+    <div class="routine-card" id="rcard-${r.id}">
+      <div class="routine-card-header" onclick="toggleRCard('${r.id}')">
+        <div>
+          <div class="routine-card-title">${r.emoji} ${r.name}</div>
+          <div class="routine-card-meta">${r.exercises.length} ejercicios · ${r.totalMin}</div>
+        </div>
+        <div class="ex-chevron">›</div>
+      </div>
+      <div class="routine-card-body">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">${r.desc}</p>
+        ${r.exercises.map((e,i)=>{
+          const ex = EX.find(x=>x.id===e.id);
+          const name = ex ? ex.name : e.note;
+          const meta = ex ? e.note : '';
+          return `<div class="routine-ex-item">
+            <div class="routine-ex-num">${i+1}</div>
+            <div class="routine-ex-info">
+              <div class="routine-ex-name">${name}</div>
+              ${meta ? `<div class="routine-ex-dur">${meta}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+        ${r.id !== 'variaciones' ? `<button class="btn-start" onclick="startRoutine('${r.id}')">▶ Comenzar esta rutina</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleRCard(id){
+  document.getElementById('rcard-'+id).classList.toggle('open');
+}
+
+function startRoutine(id){
+  activeRoutine = ROUTINES.find(r=>r.id===id);
+  sessionChecked = {};
+  showView('sesion', document.querySelectorAll('.nav-btn')[2]);
+  renderSession();
+}
+
+// ═══════════════════════════════════════════════════════
+// LIBRARY
+// ═══════════════════════════════════════════════════════
+function filterEx(tag,btn){
+  exFilter=tag;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderLibrary();
+}
+
+function renderLibrary(){
+  const list = document.getElementById('ex-list');
+  const filtered = exFilter==='all' ? EX : EX.filter(e=>e.tags.includes(exFilter));
+  list.innerHTML = filtered.map(ex=>{
+    const tagHTML = ex.tags.map(t=>`<span class="ex-tag ${t}">${{rodilla:'🦵 Rodilla',postura:'🧍 Postura',core:'💪 Core',cadera:'🔄 Cadera',abdominal:'🔥 Abdominal',cardio:'❤️ Cardio'}[t]||t}</span>`).join('');
+    return `<div class="ex-card" id="card-${ex.id}">
+      <div class="ex-card-header" onclick="toggleCard('${ex.id}')">
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-meta">${ex.dur}</div>
+          <div class="ex-tags">${tagHTML}</div>
+        </div>
+        <div class="ex-chevron">›</div>
+      </div>
+      <div class="ex-detail">
+        <p class="ex-description">${ex.desc}</p>
+        <div class="ex-steps">${ex.steps.map((s,i)=>`<div class="ex-step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div>
+        <div class="ex-actions">
+          <a class="btn-yt" href="${ex.yt}" target="_blank">▶ Ver en YouTube</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(id){
+  document.getElementById('card-'+id).classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════════════════════
+function renderSession(){
+  const el = document.getElementById('session-display');
+  if(!activeRoutine){
+    el.innerHTML=`<div class="empty-state"><div class="icon">🏃</div><p>Selecciona una rutina desde <strong>Rutinas</strong> para comenzar.</p></div>`;
+    return;
+  }
+  const done = Object.values(sessionChecked).filter(Boolean).length;
+  const total = activeRoutine.exercises.length;
+  const pct = Math.round((done/total)*100);
+
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;color:var(--text2)">${activeRoutine.emoji} ${activeRoutine.name}</span>
+      <span style="font-size:13px;color:var(--accent);font-weight:500">${pct}%</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="session-card">
+      ${activeRoutine.exercises.map((e,i)=>{
+        const ex = EX.find(x=>x.id===e.id);
+        const isDone = sessionChecked[e.id];
+        return `<div class="session-ex">
+          <button class="session-check ${isDone?'done':''}" onclick="toggleCheck('${e.id}')">${isDone?'✓':''}</button>
+          <div class="session-ex-info">
+            <div class="session-ex-name" style="${isDone?'text-decoration:line-through;opacity:.5':''}">${ex?ex.name:'—'}</div>
+            <div class="session-ex-meta">${e.note}</div>
+          </div>
+          <button onclick="goToExercise('${e.id}')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer">Ver ›</button>
+        </div>`;
+      }).join('')}
+    </div>
+    ${done>0?`<button class="btn-primary" onclick="openModal('modal-session')">Finalizar y guardar (${done}/${total})</button>`:''}
+    <button class="btn-secondary" onclick="activeRoutine=null;renderSession()">Cambiar rutina</button>
+  `;
+}
+
+function toggleCheck(id){
+  sessionChecked[id]=!sessionChecked[id];
+  renderSession();
+}
+
+function goToExercise(id){
+  const ex = EX.find(x=>x.id===id);
+  if(!ex) return;
+  const tagHTML = ex.tags.map(t=>`<span class="ex-tag ${t}">${{rodilla:'🦵 Rodilla',postura:'🧍 Postura',core:'💪 Core',cadera:'🔄 Cadera',abdominal:'🔥 Abdominal',cardio:'❤️ Cardio'}[t]||t}</span>`).join('');
+  document.getElementById('modal-ex-content').innerHTML=`
+    <div class="modal-title">${ex.name}</div>
+    <div class="ex-tags" style="margin-bottom:14px">${tagHTML}</div>
+    <p class="ex-description">${ex.desc}</p>
+    <div class="ex-steps" style="margin-bottom:16px">
+      ${ex.steps.map((s,i)=>`<div class="ex-step">
+        <div class="step-num">${i+1}</div>
+        <div class="step-text">${s}</div>
+      </div>`).join('')}
+    </div>
+    <a class="btn-yt" href="${ex.yt}" target="_blank" style="display:flex;margin-bottom:12px">▶ Ver en YouTube</a>
+  `;
+  document.getElementById('modal-ex-detail').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function selectFeel(type,el,val){
+  const row = document.getElementById('feel-'+type);
+  row.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  if(type==='general') sessionFeel=val;
+  else sessionKnee=val;
+}
+
+function saveSession(){
+  const done = activeRoutine.exercises.filter(e=>sessionChecked[e.id]);
+  const s={
+    id:Date.now(), time:new Date().toISOString(),
+    routineName: activeRoutine.name,
+    exercises:done.map(e=>{const ex=EX.find(x=>x.id===e.id);return ex?ex.name:e.id;}),
+    feel:sessionFeel, knee:sessionKnee,
+    nota:document.getElementById('session-nota').value.trim(),
+    duration:done.length*5
+  };
+  sessions.unshift(s);
+  localStorage.setItem('ego-sessions2',JSON.stringify(sessions));
+  sessionChecked={};
+  activeRoutine=null;
+  closeModal('modal-session');
+  renderSession();
+  renderProgress();
+  updateStreak();
+  showToast('✓ Sesión guardada');
+}
+
+// ═══════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════
+function saveMetrics(){
+  const peso=parseFloat(document.getElementById('inp-peso').value);
+  const cintura=parseFloat(document.getElementById('inp-cintura').value);
+  if(!peso && !cintura){showToast('Ingresa al menos una medida');return;}
+  metrics.unshift({time:new Date().toISOString(),peso:peso||null,cintura:cintura||null});
+  localStorage.setItem('ego-metrics',JSON.stringify(metrics));
+  document.getElementById('inp-peso').value='';
+  document.getElementById('inp-cintura').value='';
+  renderProgress();
+  showToast('✓ Medidas guardadas');
+}
+
+function renderProgress(){
+  // Metrics cards
+  const last = metrics[0]||{};
+  const prev = metrics[1]||{};
+  const inicialPeso = 90, inicialCintura = 110;
+  const peso = last.peso||inicialPeso;
+  const cintura = last.cintura||inicialCintura;
+  const deltaPeso = last.peso ? (last.peso - inicialPeso).toFixed(1) : null;
+  const deltaCintura = last.cintura ? (last.cintura - inicialCintura).toFixed(1) : null;
+
+  document.getElementById('metrics-display').innerHTML=`
+    <div class="metric-card">
+      <div class="metric-val">${peso}</div>
+      <div class="metric-label">PESO (kg)</div>
+      ${deltaPeso!==null?`<div class="metric-delta ${parseFloat(deltaPeso)<0?'good':'bad'}">${parseFloat(deltaPeso)>0?'+':''}${deltaPeso} kg vs inicio</div>`:'<div class="metric-delta" style="color:var(--text3)">Inicial: 90 kg</div>'}
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">${cintura}</div>
+      <div class="metric-label">CINTURA (cm)</div>
+      ${deltaCintura!==null?`<div class="metric-delta ${parseFloat(deltaCintura)<0?'good':'bad'}">${parseFloat(deltaCintura)>0?'+':''}${deltaCintura} cm vs inicio</div>`:'<div class="metric-delta" style="color:var(--text3)">Inicial: 110 cm</div>'}
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">${sessions.length}</div>
+      <div class="metric-label">SESIONES</div>
+      <div class="metric-delta" style="color:var(--text3)">Total completadas</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">${new Set(sessions.map(s=>new Date(s.time).toDateString())).size}</div>
+      <div class="metric-label">DÍAS ACTIVOS</div>
+      <div class="metric-delta" style="color:var(--text3)">Con algún ejercicio</div>
+    </div>
+  `;
+
+  // Session history
+  const histEl = document.getElementById('history-display');
+  if(sessions.length===0){
+    histEl.innerHTML='<div class="empty-state"><div class="icon">📊</div><p>Sin sesiones aún.</p></div>';
+    return;
+  }
+  const groups={};
+  sessions.forEach(s=>{
+    const d=new Date(s.time).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+    if(!groups[d])groups[d]=[];
+    groups[d].push(s);
+  });
+  histEl.innerHTML=Object.entries(groups).map(([date,items])=>`
+    <p class="section-label" style="text-transform:capitalize">${date}</p>
+    ${items.map(s=>`<div class="hist-card">
+      <button class="hist-delete" onclick="deleteSession(${s.id})">✕</button>
+      <div class="hist-header">
+        <span style="font-size:12px;color:var(--text2)">${new Date(s.time).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})} · ${s.routineName}</span>
+        <span class="hist-duration">${s.exercises.length} ejercicios</span>
+      </div>
+      <div class="hist-exercises">${s.exercises.join(' · ')||'—'}</div>
+      <div class="hist-feel">${[s.feel,s.knee,s.nota].filter(Boolean).join(' · ')}</div>
+    </div>`).join('')}
+  `).join('');
+}
+
+function deleteSession(id){
+  sessions=sessions.filter(s=>s.id!==id);
+  localStorage.setItem('ego-sessions2',JSON.stringify(sessions));
+  renderProgress();
+  updateStreak();
+  showToast('Eliminado');
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL / TOAST
+// ═══════════════════════════════════════════════════════
+function openModal(id){
+  sessionFeel=null;sessionKnee=null;
+  document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('session-nota').value='';
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});
+});
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+init();
+</script>
+</body>
+</html>
